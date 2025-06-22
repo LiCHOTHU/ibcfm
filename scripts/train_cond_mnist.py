@@ -49,7 +49,8 @@ def parse_args() -> argparse.Namespace:
                    help='Which 28×28 dataset to train on')
     p.add_argument('--matcher', choices=['cfm','ot','sb','target'], default='cfm')
     p.add_argument('--sigma', type=float, default=0.0)
-    p.add_argument('--n_epochs', type=int, default=200)
+    p.add_argument('--n_epochs', type=int, default=20000)
+    p.add_argument('--save_every', type=int, default=1000,help = 'Save samples & checkpoint every N epochs')
     p.add_argument('--batch_size', type=int, default=128)
     p.add_argument('--lr', type=float, default=1e-4)
     p.add_argument('--n_steps', type=int, default=128,
@@ -57,7 +58,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument('--n_samples', type=int, default=100,
                    help='Number of generated samples (must be multiple of 10)')
     p.add_argument('--device', default='cuda' if torch.cuda.is_available() else 'cpu')
-    p.add_argument('--wandb_project', type=str, default='flow_matching')
+    p.add_argument('--wandb_project', type=str, default=None)
     p.add_argument('--wandb_run_name', type=str, default='flow_matching')
     p.add_argument('--no_wandb', action='store_true')
     # IB hyperparameters
@@ -349,16 +350,17 @@ def main() -> Tuple[float, int, float]:
             wandb.log({'FID': fid, 'NFE': nfe, 'NNL': nnl})
 
         # --- save samples & checkpoint ---
-        save_samples_grid(samples, checkpoint_dir, epoch)
-        ckpt = {
-            'epoch': epoch,
-            'model_state_dict': model.state_dict(),
-            'optimizer_state_dict': opt.state_dict(),
-            'cfg': cfg
-        }
-        ckpt_path = checkpoint_dir / f"ckpt_epoch{epoch:03d}.pt"
-        torch.save(ckpt, ckpt_path)
-        print(f"→ saved checkpoint to {ckpt_path}\n")
+        if (epoch + 1) % cfg['save_every'] == 0:
+            save_samples_grid(samples, checkpoint_dir, epoch)
+            ckpt = {
+                'epoch': epoch,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': opt.state_dict(),
+                'cfg': cfg
+            }
+            ckpt_path = checkpoint_dir / f"ckpt_epoch{epoch:03d}.pt"
+            torch.save(ckpt, ckpt_path)
+            print(f"→ saved checkpoint to {ckpt_path}\n")
 
     if use_wandb:
         wandb.finish()

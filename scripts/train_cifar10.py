@@ -67,7 +67,7 @@ def parse_args() -> argparse.Namespace:
     # TODO use a smaller, default=20000
     p.add_argument('--save_step', type=int, default=2000)
     p.add_argument('--device', default='cuda' if torch.cuda.is_available() else 'cpu')
-    p.add_argument('--wandb_project', type=str, default='flow_matching')
+    p.add_argument('--wandb_project', type=str, default=None)
     p.add_argument('--wandb_run_name', type=str, default=None)
     p.add_argument('--no_wandb', action='store_true')
     p.add_argument('--fid_batch', type=int, default=64)

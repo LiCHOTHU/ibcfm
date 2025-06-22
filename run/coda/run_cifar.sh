@@ -12,8 +12,8 @@
 set -e  # abort on error
 
 PROJECT="FlowMatchExp"           # W&B project name
-# MODELS=("otcfm" "icfm" "fm" "si")
-MODELS=("otcfm")
+MODELS=("otcfm" "icfm" "fm" "si")
+# MODELS=("otcfm")
 IB_FLAGS=("on" "off")            # 'on' -> pass --use_ib
 
 # timestamp for unique run names
