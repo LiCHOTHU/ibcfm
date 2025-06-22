@@ -46,16 +46,6 @@ cd $dd
 # Invoke training script
 python scripts/train_cifar10.py \
   --model "$MODEL" \
-  --sigma 0.0 \
-  --num_channel 128 \
-  --lr 1e-4 \
-  --grad_clip 1.0 \
-  --total_steps 70000 \
-  --warmup 5000 \
-  --batch_size 128 \
-  --num_workers 4 \
-  --ema_decay 0.9999 \
-  --save_step 5000 \
   --device "$( [ -z "$CUDA_VISIBLE_DEVICES" ] && echo "cpu" || echo "cuda" )" \
   --wandb_project "$PROJECT" \
   --wandb_run_name "$RUN_NAME" \

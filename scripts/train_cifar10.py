@@ -53,11 +53,11 @@ def parse_args() -> argparse.Namespace:
     p.add_argument('--sigma', type=float, default=0.0)
     p.add_argument('--num_channel', type=int, default=128,
                    help='base channel count for UNet')
-    p.add_argument('--lr', type=float, default=1e-4)
+    p.add_argument('--lr', type=float, default=5e-5)
     p.add_argument('--grad_clip', type=float, default=1.0)
 
     # TODO use a smaller, default=400000
-    p.add_argument('--total_steps', type=int, default=60000)
+    p.add_argument('--total_steps', type=int, default=400000)
     p.add_argument('--warmup', type=int, default=5000)
     p.add_argument('--batch_size', type=int, default=128)
     p.add_argument('--num_workers', type=int, default=4)
@@ -65,7 +65,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument('--parallel', action='store_true')
 
     # TODO use a smaller, default=20000
-    p.add_argument('--save_step', type=int, default=2000)
+    p.add_argument('--save_step', type=int, default=20000)
     p.add_argument('--device', default='cuda' if torch.cuda.is_available() else 'cpu')
     p.add_argument('--wandb_project', type=str, default=None)
     p.add_argument('--wandb_run_name', type=str, default=None)
@@ -170,7 +170,7 @@ def main() -> Tuple[float,int,float]:
 
     # TODO use a smaller for debug, num_res_blocks=2
     net = UNetModelWrapper(
-        dim=(3,32,32), num_res_blocks=1,
+        dim=(3,32,32), num_res_blocks=2,
         num_channels=cfg['num_channel'], channel_mult=[1,2,2,2],
         num_heads=4, num_head_channels=64,
         attention_resolutions='16', dropout=0.1

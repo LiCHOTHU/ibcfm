@@ -49,10 +49,10 @@ def parse_args() -> argparse.Namespace:
                    help='Which 28×28 dataset to train on')
     p.add_argument('--matcher', choices=['cfm','ot','sb','target'], default='cfm')
     p.add_argument('--sigma', type=float, default=0.0)
-    p.add_argument('--n_epochs', type=int, default=20000)
-    p.add_argument('--save_every', type=int, default=1000,help = 'Save samples & checkpoint every N epochs')
+    p.add_argument('--n_epochs', type=int, default=200000)
+    p.add_argument('--save_every', type=int, default=4000,help = 'Save samples & checkpoint every N epochs')
     p.add_argument('--batch_size', type=int, default=128)
-    p.add_argument('--lr', type=float, default=1e-4)
+    p.add_argument('--lr', type=float, default=5e-5)
     p.add_argument('--n_steps', type=int, default=128,
                    help='ODE solver steps for sampling (NFE)')
     p.add_argument('--n_samples', type=int, default=100,
