@@ -31,6 +31,9 @@ echo "Running model=$MODEL, IB=$IB_FLAG, run=$RUN_NAME"
 CKPT_DIR=/storage/home/hcoda1/8/lwang831/p-agarg35-0/workspace/ibcfm/checkpoints/${MODEL}_cifar10_${IB_FLAG}_${SLURM_JOB_ID}
 mkdir -p $CKPT_DIR
 
+# Export your W&B key if needed
+export WANDB_API_KEY="fe43daee24fa5113fd91167314d9448971f808ef"
+
 # W&B
 echo "Using W&B project $PROJECT, run $RUN_NAME"
 export WANDB_PROJECT=$PROJECT

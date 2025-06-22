@@ -25,8 +25,10 @@ conda activate torchcfm
 # Navigate to project directory
 cd /storage/home/hcoda1/8/lwang831/p-agarg35-0/workspace/ibcfm
 
+# Export your W&B key if needed
+export WANDB_API_KEY="fe43daee24fa5113fd91167314d9448971f808ef"
+
 echo "Dataset=$DATASET, Matcher=$MATCHER, IB=$IB_FLAG, Run=$RUN_NAME"
-\# Run training script
 python scripts/train_cond_mnist.py \
     --dataset "$DATASET" \
     --matcher "$MATCHER" \
