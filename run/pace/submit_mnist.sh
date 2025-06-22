@@ -29,7 +29,7 @@ for ds in "${DATASETS[@]}"; do
 
       sbatch \
         --export=DATASET=$ds,MATCHER=$matcher,IB_FLAG=$ib_tag,PROJECT=$PROJECT,RUN_NAME=$RUN_NAME \
-        train_mnist.sbatch
+        mnist.sbatch
 
     done
   done

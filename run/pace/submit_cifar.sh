@@ -18,6 +18,6 @@ for model in "${MODELS[@]}"; do
     RUN_NAME="${model}_${ib_tag}_$(date +%Y%m%d-%H%M%S)"
     echo "Submitting job for model=$model IB=$ib_tag"
     sbatch --export=MODEL=$model,IB_FLAG=$ib_tag,PROJECT=$PROJECT,RUN_NAME=$RUN_NAME \
-           train_cifar.sbatch
+           cifar.sbatch
   done
 done
