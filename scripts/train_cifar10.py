@@ -60,7 +60,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument('--total_steps', type=int, default=400000)
     p.add_argument('--warmup', type=int, default=5000)
     p.add_argument('--batch_size', type=int, default=128)
-    p.add_argument('--num_workers', type=int, default=4)
+    p.add_argument('--num_workers', type=int, default=1)
     p.add_argument('--ema_decay', type=float, default=0.9999)
     p.add_argument('--parallel', action='store_true')
 
@@ -153,6 +153,7 @@ def main() -> Tuple[float,int,float]:
     use_wandb = args.wandb_project and not args.no_wandb and wandb
     if use_wandb:
         run_name = args.wandb_run_name or checkpoint_dir.name
+        print("wandb run name:", run_name)
         wandb.init(project=args.wandb_project, name=run_name, config=cfg)
 
     device = torch.device(cfg['device'])
@@ -226,6 +227,23 @@ def main() -> Tuple[float,int,float]:
                 wandb.log(log_dict)
 
             if (step+1) % cfg['save_step'] == 0:
+                # --- validation ---
+                net.eval()
+                val_loss_sum = 0.0
+                n_val = 0
+                with torch.no_grad():
+                    for x_val,_ in val_loader:
+                        x_val = x_val.to(device)
+                        x0_val = torch.randn_like(x_val)
+                        t_val, xt_val, ut_val = FM.sample_location_and_conditional_flow(x0_val, x_val)
+                        v_val = net(t_val, xt_val)
+                        val_loss_sum += F.mse_loss(v_val, ut_val).item() * x_val.size(0)
+                        n_val += x_val.size(0)
+                avg_val_loss = val_loss_sum / n_val
+                print(f"Step {step+1}: val_loss={avg_val_loss:.4f}")
+                if use_wandb:
+                    wandb.log({'val_loss': avg_val_loss, 'step': step+1})
+
                 # sampling and metrics
                 samples = generate_samples_return(
                     ema_model, args.parallel,

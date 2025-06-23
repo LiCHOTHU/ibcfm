@@ -88,7 +88,7 @@ def _make_run_name(cfg):
 
 
 
-def get_data_loaders(dataset: str, batch_size: int, workers: int = 4) -> Tuple[DataLoader, DataLoader]:
+def get_data_loaders(dataset: str, batch_size: int, workers: int = 1) -> Tuple[DataLoader, DataLoader]:
     tfm = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.5,), (0.5,)),
@@ -126,7 +126,7 @@ def compute_fid(
     device: torch.device,
     batch_size: int = 64,
     dims: int = 2048,
-    num_workers: int = 4,
+    num_workers: int = 1,
 ) -> float:
     with tempfile.TemporaryDirectory() as real_dir, tempfile.TemporaryDirectory() as gen_dir:
         to_pil = ToPILImage()
@@ -208,6 +208,7 @@ def main() -> Tuple[float, int, float]:
     device = torch.device(cfg['device'])
     use_wandb = (cfg['wandb_project'] is not None) and not cfg['no_wandb'] and wandb
     if use_wandb:
+        print("wandb run name:", cfg['wandb_run_name'])
         wandb.init(project=cfg['wandb_project'], name=cfg['wandb_run_name'], config=cfg)
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

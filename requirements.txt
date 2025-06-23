@@ -14,3 +14,5 @@ torchdiffeq
 absl-py
 clean-fid
 pytorch-fid
+torchmetrics[image]
+wandb
