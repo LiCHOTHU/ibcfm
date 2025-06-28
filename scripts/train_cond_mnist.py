@@ -290,8 +290,8 @@ def main() -> Tuple[float, int, float]:
                 ent = compute_entropy_loss(u_pred)
                 loss = base_loss + cfg['ib_lambda'] * kin - cfg['ib_beta'] * ent
 
-                sum_kin += kin.item()
-                sum_ent += ent.item()
+                sum_kin += cfg['ib_lambda'] * kin.item()
+                sum_ent +=  - cfg['ib_beta'] * ent.item()
             else:
                 loss = base_loss
 

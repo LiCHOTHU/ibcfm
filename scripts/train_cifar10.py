@@ -65,7 +65,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument('--parallel', action='store_true')
 
     # TODO use a smaller, default=20000
-    p.add_argument('--save_step', type=int, default=20000)
+    p.add_argument('--save_step', type=int, default=2000)
     p.add_argument('--device', default='cuda' if torch.cuda.is_available() else 'cpu')
     p.add_argument('--wandb_project', type=str, default=None)
     p.add_argument('--wandb_run_name', type=str, default=None)
@@ -214,17 +214,29 @@ def main() -> Tuple[float,int,float]:
             else:
                 loss = flow_loss
 
+            # Make a dict of all the pieces you care about
+            log_dict = {
+                'flow_loss': flow_loss.item(),
+                'step_loss': loss.item(),
+                'step': step,
+            }
+            if cfg['use_ib']:
+                log_dict.update({
+                    'kinetic': kin.item(),
+                    'entropy': ent.item(),
+                    'ib_term': ib_term.item(),
+                    'λ·kinetic': (cfg['ib_lambda'] * kin).item(),
+                    'β·entropy': (cfg['ib_beta'] * ent).item(),
+                })
+            # send them off to wandb (or your logger of choice)
+            if use_wandb:
+                wandb.log(log_dict)
+
             loss.backward()
             torch.nn.utils.clip_grad_norm_(net.parameters(), cfg['grad_clip'])
             optim.step()
             sched.step()
             ema(net, ema_model, cfg['ema_decay'])
-
-            if use_wandb:
-                log_dict = {'step_loss': loss.item(), 'flow_loss': flow_loss.item(), 'step': step}
-                if cfg['use_ib']:
-                    log_dict.update({'kinetic': kin.item(), 'entropy': ent.item()})
-                wandb.log(log_dict)
 
             if (step+1) % cfg['save_step'] == 0:
                 # --- validation ---
@@ -264,15 +276,17 @@ def main() -> Tuple[float,int,float]:
                 print(f"Step {step+1}: FID={fid:.2f}, NNL={nnl:.3f}")
                 if use_wandb:
                     wandb.log({'FID': fid, 'NNL': nnl, 'step': step+1})
-                # save checkpoint
-                ckpt = {
-                    'step': step+1,
-                    'net': net.state_dict(),
-                    'ema': ema_model.state_dict(),
-                    'optim': optim.state_dict(),
-                    'sched': sched.state_dict(),
-                }
-                torch.save(ckpt, checkpoint_dir / f"ckpt_step{step+1:06d}.pt")
+
+                if (step + 1) % (cfg['save_step'] * 10) == 0:
+                    # save checkpoint
+                    ckpt = {
+                        'step': step+1,
+                        'net': net.state_dict(),
+                        'ema': ema_model.state_dict(),
+                        'optim': optim.state_dict(),
+                        'sched': sched.state_dict(),
+                    }
+                    torch.save(ckpt, checkpoint_dir / f"ckpt_step{step+1:06d}.pt")
 
             step += 1
             pbar.update(1)
