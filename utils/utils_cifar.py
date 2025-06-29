@@ -1,6 +1,6 @@
 import copy
 import os
-
+import math
 import torch
 from torch import distributed as dist
 from torchdyn.core import NeuralODE
@@ -74,7 +74,7 @@ def generate_samples(model, parallel, savedir, step, net_="normal"):
     model.train()
 
 
-def generate_samples_return(model, parallel):
+def generate_samples_return(model, parallel, image_size=32):
     """Generate 64 samples via Euler flow (returns tensor, does not save files)."""
     model.eval()
     model_copy = copy.deepcopy(model)
@@ -85,11 +85,11 @@ def generate_samples_return(model, parallel):
     node = NeuralODE(model_copy, solver="euler", sensitivity="adjoint")
     with torch.no_grad():
         traj = node.trajectory(
-            torch.randn(64, 3, 32, 32, device=device),
+            torch.randn(64, 3, image_size, image_size, device=device),
             torch.linspace(0, 1, 100, device=device),
         )
         # final timestep, reshape and clamp to [-1,1]
-        samples = traj[-1].view(-1, 3, 32, 32).clamp(-1, 1)
+        samples = traj[-1].view(-1, 3, image_size, image_size).clamp(-1, 1)
 
     model.train()
     return samples
@@ -109,3 +109,12 @@ def infiniteloop(dataloader):
     while True:
         for x, y in iter(dataloader):
             yield x
+
+
+def compute_entropy_loss(pred: torch.Tensor, eps: float = 1e-7) -> torch.Tensor:
+    """Estimate entropy via per-dimension variance."""
+    B = pred.shape[0]
+    D = pred.numel() // B
+    x = pred.reshape(B, D)
+    var = x.var(dim=0, unbiased=False) + eps
+    return 0.5 * torch.sum(torch.log(2 * math.pi * math.e * var))
