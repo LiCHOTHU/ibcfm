@@ -4,11 +4,11 @@
 #SBATCH -p gpu-a100,gpu-h100,gpu-h200       # Partition(s)
 #SBATCH --cpus-per-task=2                    # CPUs per task
 #SBATCH --ntasks=1                           # Tasks
-#SBATCH --time=12:00:00                      # Time limit
+#SBATCH --time=8:00:00                       # Time limit
 #SBATCH --mem-per-gpu=48G                    # Memory per GPU
-#SBATCH --job-name=imagenet_flow             # Job name
-#SBATCH --error=/storage/home/hcoda1/8/lwang831/p-agarg35-0/logs/imagenet_%j.err
-#SBATCH --output=/storage/home/hcoda1/8/lwang831/p-agarg35-0/logs/imagenet_%j.out
+#SBATCH --job-name=cifar_flow                # Job name
+#SBATCH --error=/storage/home/hcoda1/8/lwang831/p-agarg35-0/logs/cifar_%j.err
+#SBATCH --output=/storage/home/hcoda1/8/lwang831/p-agarg35-0/logs/cifar_%j.out
 #SBATCH --qos=embers
 #SBATCH --account=gts-agarg35                # Account
 
