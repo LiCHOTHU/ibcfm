@@ -224,7 +224,7 @@ def main() -> Tuple[float,int,float]:
                 log_dict.update({
                     'kinetic': kin.item(),
                     'entropy': ent.item(),
-                    'ib_term': ib_term.item(),
+                    'ib_term': (cfg['ib_lambda'] * kin - cfg['ib_beta'] * ent).item(),
                     'λ·kinetic': (cfg['ib_lambda'] * kin).item(),
                     'β·entropy': (cfg['ib_beta'] * ent).item(),
                 })
