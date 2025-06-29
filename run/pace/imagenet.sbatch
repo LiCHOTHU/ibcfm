@@ -6,9 +6,9 @@
 #SBATCH --ntasks=1                           # Tasks
 #SBATCH --time=8:00:00                       # Time limit
 #SBATCH --mem-per-gpu=48G                    # Memory per GPU
-#SBATCH --job-name=cifar_flow                # Job name
-#SBATCH --error=/storage/home/hcoda1/8/lwang831/p-agarg35-0/logs/cifar_%j.err
-#SBATCH --output=/storage/home/hcoda1/8/lwang831/p-agarg35-0/logs/cifar_%j.out
+#SBATCH --job-name=image_flow                # Job name
+#SBATCH --error=/storage/home/hcoda1/8/lwang831/p-agarg35-0/logs/image_%j.err
+#SBATCH --output=/storage/home/hcoda1/8/lwang831/p-agarg35-0/logs/image_%j.out
 #SBATCH --qos=embers
 #SBATCH --account=gts-agarg35                # Account
 
@@ -50,7 +50,7 @@ fi
 cd /storage/home/hcoda1/8/lwang831/p-agarg35-0/workspace/ibcfm
 
 # Invoke training
-python scripts/train_imagenet64_flow.py \
+python scripts/train_imagenet64.py \
   --model          "$MODEL" \
   --device         "$( [ -z "$CUDA_VISIBLE_DEVICES" ] && echo cpu || echo cuda )" \
   --wandb_project  "$PROJECT" \
