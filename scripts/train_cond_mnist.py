@@ -48,7 +48,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument('--dataset', choices=['mnist','fashion-mnist'], default='mnist',
                    help='Which 28×28 dataset to train on')
     p.add_argument('--matcher', choices=['cfm','ot','sb','target'], default='cfm')
-    p.add_argument('--sigma', type=float, default=0.0)
+    p.add_argument('--sigma', type=float, default=1.0)
     p.add_argument('--n_epochs', type=int, default=200000)
     p.add_argument('--save_every', type=int, default=4000,help = 'Save samples & checkpoint every N epochs')
     p.add_argument('--batch_size', type=int, default=128)
@@ -64,7 +64,7 @@ def parse_args() -> argparse.Namespace:
     # IB hyperparameters
     p.add_argument('--use_ib', action='store_true', help='Enable Information Bottleneck regularization')
     p.add_argument('--ib_lambda', type=float, default=1e-1, help='Weight for kinetic-energy penalty')
-    p.add_argument('--ib_beta', type=float, default=1e-4, help='Weight for entropy regularizer')
+    p.add_argument('--ib_beta', type=float, default=-1e-4, help='Weight for entropy regularizer')
     return p.parse_args()
 
 def _make_run_name(cfg):
