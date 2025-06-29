@@ -50,7 +50,7 @@ fi
 cd /storage/home/hcoda1/8/lwang831/p-agarg35-0/workspace/ibcfm
 
 # Invoke training
-python scripts/train_imagenet64.py \
+python scripts/train_imagenet.py \
   --model          "$MODEL" \
   --device         "$( [ -z "$CUDA_VISIBLE_DEVICES" ] && echo cpu || echo cuda )" \
   --wandb_project  "$PROJECT" \
