@@ -1,23 +1,30 @@
+# submit_cifar_jobs.sh
 #!/usr/bin/env bash
 # ------------------------------------------------------------------
 # submit_cifar_jobs.sh
 #
-# Submits sbatch jobs for CIFAR-10 flow-matching over model and IB sweeps.
+# Submits sbatch jobs for CIFAR-10 flow-matching over model and IB sweeps,
+# now passing a boolean --use_ib flag (True/False).
 # ------------------------------------------------------------------
 
 set -e
 
 PROJECT="FlowMatchCIFAR"
-MODELS=("otcfm" "icfm" "fm" "si")
-IB_FLAGS=("on" "off")
+MODELS=(otcfm icfm fm si)
+IB_OPTIONS=(True False)
+timestamp=$(date +%Y%m%d-%H%M%S)
 
-# Loop and submit
 for model in "${MODELS[@]}"; do
-  for ib in "${IB_FLAGS[@]}"; do
-    ib_tag=$([[ "$ib" == "on" ]] && echo "ib" || echo "noib")
-    RUN_NAME="${model}_${ib_tag}_$(date +%Y%m%d-%H%M%S)"
-    echo "Submitting job for model=$model IB=$ib_tag"
-    sbatch --export=MODEL=$model,IB_FLAG=$ib_tag,PROJECT=$PROJECT,RUN_NAME=$RUN_NAME \
-           cifar.sbatch
+  for use_ib in "${IB_OPTIONS[@]}"; do
+
+    ib_tag=$([[ "$use_ib" == "True" ]] && echo "ib" || echo "noib")
+    RUN_NAME="${model}_${ib_tag}_${timestamp}"
+
+    echo "Submitting job for model=$model use_ib=$use_ib run=$RUN_NAME"
+
+    sbatch \
+      --export=MODEL="$model",USE_IB="$use_ib",PROJECT="$PROJECT",RUN_NAME="$RUN_NAME" \
+      cifar.sbatch
+
   done
 done

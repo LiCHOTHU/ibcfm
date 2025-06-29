@@ -35,7 +35,7 @@ python scripts/train_cond_mnist.py \
     --device "$( [ -z "$CUDA_VISIBLE_DEVICES" ] && echo "cpu" || echo "cuda" )" \
     --wandb_project "$PROJECT" \
     --wandb_run_name "$RUN_NAME" \
-    $( [[ "$IB_FLAG" == "on" ]] && echo "--use_ib --ib_lambda 0.03 --ib_beta 5e-5" )
+    --use_ib "$USE_IB"
 
 # Cleanup temporary files
 echo "Cleaning up TMPDIR $TMPDIR"
