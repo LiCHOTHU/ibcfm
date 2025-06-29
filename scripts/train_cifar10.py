@@ -74,7 +74,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument('--fid_samples', type=int, default=16)
 
     # IB hyperparameters
-    p.add_argument('--use_ib', type=bool, default=False, help='Enable Information Bottleneck regularization')
+    p.add_argument('--use_ib', action='store_true', help='Enable Information Bottleneck regularization')
     p.add_argument('--ib_lambda', type=float, default=1e-1, help='Weight for kinetic-energy penalty')
     p.add_argument('--ib_beta', type=float, default=1e-4, help='Weight for entropy regularizer')
     return p.parse_args()

@@ -28,6 +28,12 @@ cd /storage/home/hcoda1/8/lwang831/p-agarg35-0/workspace/ibcfm
 # Export your W&B key if needed
 export WANDB_API_KEY="fe43daee24fa5113fd91167314d9448971f808ef"
 
+if [ "$USE_IB" = "True" ]; then
+  IB_FLAG="--use_ib"
+else
+  IB_FLAG=""
+fi
+
 echo "Dataset=$DATASET, Matcher=$MATCHER, IB=$IB_FLAG, Run=$RUN_NAME"
 python scripts/train_cond_mnist.py \
     --dataset "$DATASET" \
@@ -35,7 +41,7 @@ python scripts/train_cond_mnist.py \
     --device "$( [ -z "$CUDA_VISIBLE_DEVICES" ] && echo "cpu" || echo "cuda" )" \
     --wandb_project "$PROJECT" \
     --wandb_run_name "$RUN_NAME" \
-    --use_ib "$USE_IB"
+    $IB_FLAG
 
 # Cleanup temporary files
 echo "Cleaning up TMPDIR $TMPDIR"

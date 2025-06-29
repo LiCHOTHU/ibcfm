@@ -34,6 +34,12 @@ mkdir -p $CKPT_DIR
 # Export your W&B key if needed
 export WANDB_API_KEY="fe43daee24fa5113fd91167314d9448971f808ef"
 
+if [ "$USE_IB" = "True" ]; then
+  IB_FLAG="--use_ib"
+else
+  IB_FLAG=""
+fi
+
 # W&B
 echo "Using W&B project $PROJECT, run $RUN_NAME"
 export WANDB_PROJECT=$PROJECT
@@ -49,7 +55,7 @@ python scripts/train_cifar10.py \
   --device "$( [ -z "$CUDA_VISIBLE_DEVICES" ] && echo "cpu" || echo "cuda" )" \
   --wandb_project "$PROJECT" \
   --wandb_run_name "$RUN_NAME" \
-  --use_ib           "$USE_IB"
+  $IB_FLAG
 
 # Clean up
 rm -rf $TMPDIR
