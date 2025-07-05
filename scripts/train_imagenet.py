@@ -124,8 +124,8 @@ def main() -> Tuple[float,int,float]:
     )
 
     net = UNetModelWrapper(
-        dim=(3,64,64), num_res_blocks=3,
-        num_channels=cfg['num_channel'], channel_mult=[1,2,2,2,2],
+        dim=(3,64,64), num_res_blocks=2,
+        num_channels=cfg['num_channel'], channel_mult=[1,2,2,2],
         num_heads=4, num_head_channels=64,
         attention_resolutions='16', dropout=0.1
     ).to(device)
