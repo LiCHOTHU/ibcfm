@@ -74,7 +74,7 @@ def generate_samples(model, parallel, savedir, step, net_="normal"):
     model.train()
 
 
-def generate_samples_return(model, parallel, image_size=32):
+def generate_samples_return(model, parallel, image_size=32, sample_steps=100):
     """Generate 64 samples via Euler flow (returns tensor, does not save files)."""
     model.eval()
     model_copy = copy.deepcopy(model)
@@ -86,7 +86,7 @@ def generate_samples_return(model, parallel, image_size=32):
     with torch.no_grad():
         traj = node.trajectory(
             torch.randn(64, 3, image_size, image_size, device=device),
-            torch.linspace(0, 1, 100, device=device),
+            torch.linspace(0, 1, sample_steps, device=device),
         )
         # final timestep, reshape and clamp to [-1,1]
         samples = traj[-1].view(-1, 3, image_size, image_size).clamp(-1, 1)

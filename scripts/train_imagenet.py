@@ -213,7 +213,8 @@ def main() -> Tuple[float,int,float]:
                 if use_wandb: wandb.log({'val_loss': avg_val, 'step': step+1})
 
                 # sampling
-                samples = generate_samples_return(ema_model, False, 64)
+                sample_steps = 256
+                samples = generate_samples_return(ema_model, False, 64, sample_steps)
                 save_samples_grid(samples, sample_dir, step+1)
                 fid = compute_fid_from_tensor(samples, val_loader, device)
                 nnl = crude_nnl_estimate(samples)
