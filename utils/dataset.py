@@ -30,17 +30,18 @@ def get_imagenet64_loaders(
         transforms.RandomResizedCrop(64),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                             std=[0.229, 0.224, 0.225]),
+        # <— change these two lines only:
+        transforms.Normalize(mean=(0.5, 0.5, 0.5),
+                             std=(0.5, 0.5, 0.5)),
     ])
 
-    # Validation transforms: resize + center crop + normalize
     val_tf = transforms.Compose([
         transforms.Resize(64),
         transforms.CenterCrop(64),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                             std=[0.229, 0.224, 0.225]),
+        # <— and change these too:
+        transforms.Normalize(mean=(0.5, 0.5, 0.5),
+                             std=(0.5, 0.5, 0.5)),
     ])
 
     train_ds = datasets.ImageFolder(train_dir, transform=train_tf)

@@ -50,7 +50,7 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser()
     p.add_argument('--model', choices=['otcfm','icfm','fm','si'], default='otcfm',
                    help='flow matching model to use')
-    p.add_argument('--sigma', type=float, default=1.0)
+    p.add_argument('--sigma', type=float, default=0.0)
     p.add_argument('--num_channel', type=int, default=128,
                    help='base channel count for UNet')
     p.add_argument('--lr', type=float, default=5e-5)
