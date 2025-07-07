@@ -487,7 +487,7 @@ def main() -> Tuple[float,int,float]:
                         'net': net.state_dict(),
                         'ema': ema_model.state_dict(),
                         'optim': optimizer.state_dict(),
-                        'sched': sched.state_dict(),
+                        'sched': scheduler.state_dict(),
                     }
                     torch.save(ckpt, checkpoint_dir / f"ckpt_step{step+1:06d}.pt")
 
