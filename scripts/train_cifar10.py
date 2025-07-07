@@ -238,7 +238,7 @@ def main() -> Tuple[float,int,float]:
             sched.step()
             ema(net, ema_model, cfg['ema_decay'])
 
-            if (step+1) % cfg['save_step'] == 0:
+            if (step+1) % cfg['val_step'] == 0:
                 # --- validation ---
                 net.eval()
                 val_loss_sum = 0.0

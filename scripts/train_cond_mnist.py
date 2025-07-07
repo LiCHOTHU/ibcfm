@@ -80,7 +80,7 @@ def _make_run_name(cfg):
 
     model   = cfg.get('model',   'unknownModel')
     dataset = cfg.get('dataset', 'unknownData')
-    ib_tag  = 'IB' if cfg.get('use_ibd', False) else 'noIB'
+    ib_tag  = 'IB' if cfg.get('use_ib', False) else 'noIB'
     stamp   = datetime.now().strftime('%Y%m%d-%H%M%S')
 
     return f"{model}_{dataset}_{ib_tag}_{stamp}"
@@ -211,7 +211,7 @@ def main() -> Tuple[float, int, float]:
         wandb.init(project=cfg['wandb_project'], name=cfg['wandb_run_name'], config=cfg)
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    ib_tag = 'ib' if cfg.get('use_ibd', False) else 'noib'
+    ib_tag = 'ib' if cfg.get('use_ib', False) else 'noib'
     checkpoint_dir = Path("checkpoints") / f"{cfg['matcher']}_{cfg['dataset']}_{ib_tag}_{timestamp}"
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
