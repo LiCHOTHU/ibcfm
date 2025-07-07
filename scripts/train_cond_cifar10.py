@@ -459,6 +459,7 @@ def main() -> Tuple[float,int,float]:
                         val_loss_sum += F.mse_loss(v_pred, utv).item() * xv.size(0)
                         n_val += xv.size(0)
                 print(f"Step {step+1}: val_loss={val_loss_sum/n_val:.4f}")
+                avg_val_loss = val_loss_sum / n_val
                 if use_wandb:
                     wandb.log({'val_loss': avg_val_loss, 'step': step+1})
 
