@@ -16,7 +16,6 @@ timestamp=$(date +%Y%m%d-%H%M%S)
 
 for model in "${MODELS[@]}"; do
   for use_ib in "${IB_OPTIONS[@]}"; do
-e
     ib_tag=$([[ "$use_ib" == "True" ]] && echo "ib" || echo "noib")
     RUN_NAME="${model}_${ib_tag}_${timestamp}"
 
