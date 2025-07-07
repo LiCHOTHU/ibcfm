@@ -7,8 +7,8 @@
 #SBATCH --time=8:00:00                       # Time limit
 #SBATCH --mem-per-gpu=48G                    # Memory per GPU
 #SBATCH --job-name=cifar_flow                # Job name
-#SBATCH --error=/storage/home/hcoda1/8/lwang831/p-agarg35-0/logs/cifar_%j.err
-#SBATCH --output=/storage/home/hcoda1/8/lwang831/p-agarg35-0/logs/cifar_%j.out
+#SBATCH --error=/storage/home/hcoda1/8/lwang831/p-agarg35-0/logs/cond_cifar_%j.err
+#SBATCH --output=/storage/home/hcoda1/8/lwang831/p-agarg35-0/logs/cond_cifar_%j.out
 #SBATCH --qos=embers
 #SBATCH --account=gts-agarg35                # Account
 
