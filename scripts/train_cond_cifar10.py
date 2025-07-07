@@ -486,7 +486,7 @@ def main() -> Tuple[float,int,float]:
                         'step': step+1,
                         'net': net.state_dict(),
                         'ema': ema_model.state_dict(),
-                        'optim': optim.state_dict(),
+                        'optim': optimizer.state_dict(),
                         'sched': sched.state_dict(),
                     }
                     torch.save(ckpt, checkpoint_dir / f"ckpt_step{step+1:06d}.pt")
