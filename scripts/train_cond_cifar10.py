@@ -92,7 +92,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         '--batch_size',
         type=int,
-        default=128,
+        default=64,
         help='training batch size'
     )
     p.add_argument(
@@ -338,22 +338,20 @@ def main() -> Tuple[float,int,float]:
                              num_workers=cfg['num_workers'])
 
     # Conditional UNet
-    # net = UNetModel(
-    #     dim=(3,32,32), num_channels=cfg['num_channel'], num_res_blocks=2,
-    #     num_classes=10, class_cond=True,
-    #     channel_mult=[1,2,2,2], num_heads=4, num_head_channels=64,
-    #     attention_resolutions='16', dropout=0.1
-    # ).to(device)
-
-
-    # TODO just for debug
     net = UNetModel(
-        dim=(3,32,32), num_channels=cfg['num_channel'], num_res_blocks=1,
+        dim=(3,32,32), num_channels=cfg['num_channel'], num_res_blocks=2,
         num_classes=10, class_cond=True,
-        channel_mult=[1,2,2], num_heads=4, num_head_channels=64,
+        channel_mult=[1,2,2,2], num_heads=4, num_head_channels=64,
         attention_resolutions='16', dropout=0.1
     ).to(device)
 
+    # # TODO just for debug
+    # net = UNetModel(
+    #     dim=(3,32,32), num_channels=cfg['num_channel'], num_res_blocks=1,
+    #     num_classes=10, class_cond=True,
+    #     channel_mult=[1], num_heads=1, num_head_channels=4,
+    #     attention_resolutions='16', dropout=0.1
+    # ).to(device)
 
     ema_model = copy.deepcopy(net)
     if cfg.get('parallel'):
@@ -399,15 +397,52 @@ def main() -> Tuple[float,int,float]:
                 u_pred = net(t, xt, y)
                 score_loss = 0.0
             elif cfg['matcher'] == 'ot':
-                t, xt, ut, *_ = FM.guided_sample_location_and_conditional_flow(x0, x1, y1=y)
-                u_pred = net(t, xt, y)
-                score_loss = 0.0
-            else:  # 'sb'
-                t, xt, ut, _, y1, eps = FM.guided_sample_location_and_conditional_flow(
-                    x0, x1, y1=y, return_noise=True
-                )
+                t, xt, ut, _, y1 = FM.guided_sample_location_and_conditional_flow(x0, x1, y1=y)
+                # TODO lets try y1
                 u_pred = net(t, xt, y1)
-                lambda_t = FM.compute_lambda(t).view(-1,1,1,1)
+                score_loss = 0.0
+            # else:  # 'sb'
+            #     t, xt, ut, _, y1, eps = FM.guided_sample_location_and_conditional_flow(
+            #         x0, x1, y1=y, return_noise=True
+            #     )
+            #     u_pred = net(t, xt, y1)
+            #     lambda_t = FM.compute_lambda(t).view(-1,1,1,1)
+            #     s = score_model(t, xt, y1)
+            #     score_loss = F.mse_loss(lambda_t * s + eps, torch.zeros_like(eps))
+
+            else:
+                # assume y in [0..num_classes)
+                num_classes = 10
+                xt_chunks, ut_chunks, y1_chunks, eps_chunks, t_chunks = [], [], [], [], []
+                for c in range(num_classes):
+                    idx = (y == c).nonzero(as_tuple=True)[0]
+                    if idx.numel() == 0:
+                        continue
+                    x0_c, x1_c, y_c = x0[idx], x1[idx], y[idx]
+                    # 1) draw SB‐coupling *only* within this class
+                    x0i, x1j, y0i, y1j = FM.ot_sampler.sample_plan_with_labels(
+                        x0_c, x1_c, y0=y_c, y1=y_c
+                    )
+                    # 2) sample the flow‐matching pair for these points
+                    t_c, xt_c, ut_c, eps_c = FM.sample_location_and_conditional_flow(
+                        x0i, x1j, return_noise=True
+                    )
+                    xt_chunks.append(xt_c)
+                    ut_chunks.append(ut_c)
+                    y1_chunks.append(y1j)
+                    eps_chunks.append(eps_c)
+                    t_chunks.append(t_c)
+
+                # 3) recombine
+                xt = torch.cat(xt_chunks, dim=0)
+                ut = torch.cat(ut_chunks, dim=0)
+                eps = torch.cat(eps_chunks, dim=0)
+                t = torch.cat(t_chunks, dim=0)
+                y1 = torch.cat(y1_chunks, dim=0)
+
+                # 4) forward + losses
+                u_pred = net(t, xt, y1)
+                lambda_t = FM.compute_lambda(t).view(-1, 1, 1, 1)
                 s = score_model(t, xt, y1)
                 score_loss = F.mse_loss(lambda_t * s + eps, torch.zeros_like(eps))
 
