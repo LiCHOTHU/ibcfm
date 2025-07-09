@@ -122,7 +122,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         '--val_step',
         type=int,
-        default=1000,
+        default=100,
         help='steps between saving samples and checkpoints'
     )
     p.add_argument(
@@ -173,13 +173,13 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         '--ib_lambda',
         type=float,
-        default=1e-1,
+        default=5e-2,
         help='weight for IB kinetic penalty'
     )
     p.add_argument(
         '--ib_beta',
         type=float,
-        default=1e-4,
+        default=2e-5,
         help='weight for IB entropy regularizer'
     )
 
@@ -421,7 +421,7 @@ def main() -> Tuple[float,int,float]:
                     x0_c, x1_c, y_c = x0[idx], x1[idx], y[idx]
                     # 1) draw SB‐coupling *only* within this class
                     x0i, x1j, y0i, y1j = FM.ot_sampler.sample_plan_with_labels(
-                        x0_c, x1_c, y0=y_c, y1=y_c
+                        x0_c, x1_c, y1=y_c
                     )
                     # 2) sample the flow‐matching pair for these points
                     t_c, xt_c, ut_c, eps_c = FM.sample_location_and_conditional_flow(
@@ -472,7 +472,7 @@ def main() -> Tuple[float,int,float]:
                     'entropy': ent.item(),
                     'ib_term': (cfg['ib_lambda'] * kin - cfg['ib_beta'] * ent).item(),
                     'λ·kinetic': (cfg['ib_lambda'] * kin).item(),
-                    'β·entropy': (cfg['ib_beta'] * ent).item(),
+                    'β·entropy': -(cfg['ib_beta'] * ent).item(),
                 })
             if use_wandb:
                 wandb.log(log_dict)
