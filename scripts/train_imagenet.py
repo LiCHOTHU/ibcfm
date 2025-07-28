@@ -49,11 +49,11 @@ def parse_args() -> argparse.Namespace:
     p.add_argument('--lr', type=float, default=5e-5)
     p.add_argument('--grad_clip', type=float, default=1.0)
     p.add_argument('--total_steps', type=int, default=800000)
-    p.add_argument('--warmup', type=int, default=5000)
+    p.add_argument('--warmup', type=int, default=500)
     p.add_argument('--batch_size', type=int, default=64)
     p.add_argument('--num_workers', type=int, default=8)
     p.add_argument('--ema_decay', type=float, default=0.9999)
-    p.add_argument('--save_step', type=int, default=2500)
+    p.add_argument('--save_step', type=int, default=25000)
     p.add_argument('--data_root', type=str, default="/storage/home/hcoda1/8/lwang831/p-agarg35-0/workspace/ibcfm/data/imagenet64_png")
     p.add_argument('--device', default='cuda' if torch.cuda.is_available() else 'cpu')
     p.add_argument('--wandb_project', type=str, default=None)
@@ -69,6 +69,60 @@ def parse_args() -> argparse.Namespace:
 def warmup_lr(step: int, warmup: int) -> float:
     return min(step, warmup) / warmup
 
+
+# Sampling trajectory
+
+@torch.no_grad()
+def sample_and_evaluate(
+    model: UNetModel,
+    n_samples: int,
+    n_steps: int,
+    device: torch.device,
+    image_size: int,
+    image_channel: int,
+    use_torchdiffeq: bool = True,
+    atol: float = 1e-4,
+    rtol: float = 1e-4,
+    method: str = "dopri5",
+) -> torch.Tensor:
+    cls = torch.arange(10, device=device).repeat(n_samples//10)
+    x0 = torch.randn(n_samples,image_channel,image_size,image_size,device=device)
+    if use_torchdiffeq:
+        t_span = torch.linspace(0,1,2,device=device)
+        traj = odeint(lambda t,x: model(t,x,cls), x0, t_span,
+                      atol=atol, rtol=rtol, method=method)
+    else:
+        dt = 1/n_steps
+        x = x0; t = torch.ones(n_samples,device=device); outs=[x]
+        for _ in range(n_steps):
+            v = model(t,x,cls)
+            x = x - v*dt
+            t = t - dt
+            outs.append(x)
+        traj = torch.stack(outs, dim=0)
+    return traj.clamp(-1,1).cpu()
+
+
+def save_samples_grid(
+    samples: torch.Tensor,
+    checkpoint_dir: Path,
+    epoch: int,
+    nrow: int = 10,
+    value_range: tuple[float, float] = (-1, 1),
+) -> None:
+    save_dir = checkpoint_dir / "samples"
+    save_dir.mkdir(parents=True, exist_ok=True)
+    grid = make_grid(
+        samples,
+        nrow=nrow,
+        padding=0,
+        normalize=True,
+        value_range=value_range,
+    )
+    img = ToPILImage()(grid)
+    out_path = save_dir / f"image_net_flow_epoch{epoch:03d}.png"
+    img.save(out_path)
+    print(f"→ saved generated grid to {out_path}")
 
 def compute_fid_from_tensor(
     generated: torch.Tensor,
@@ -124,7 +178,7 @@ def main() -> Tuple[float,int,float]:
     )
 
     net = UNetModelWrapper(
-        dim=(3,64,64), num_res_blocks=2,
+        dim=(3,64,64), num_res_blocks=4,
         num_channels=cfg['num_channel'], channel_mult=[1,2,2,2],
         num_heads=4, num_head_channels=64,
         attention_resolutions='16', dropout=0.1
@@ -214,7 +268,16 @@ def main() -> Tuple[float,int,float]:
 
                 # sampling
                 sample_steps = 256
-                samples = generate_samples_return(ema_model, False, 64, sample_steps)
+
+                USE_TORCH_DIFFEQ = True
+                traj = sample_and_evaluate(
+                    net, 100, sample_steps, device, image_size=64,
+                    image_channel=3,
+                    use_torchdiffeq=USE_TORCH_DIFFEQ
+                )
+                samples = traj[-1]
+
+                # samples = generate_samples_return(ema_model, False, 64, sample_steps)
                 save_samples_grid(samples, sample_dir, step+1)
                 fid = compute_fid_from_tensor(samples, val_loader, device)
                 nnl = crude_nnl_estimate(samples)
@@ -224,7 +287,7 @@ def main() -> Tuple[float,int,float]:
             step += 1
             pbar.update(1)
 
-            if (step + 1) % (cfg['save_step'] * 10000) == 0:
+            if (step + 1) % (cfg['save_step']) == 0:
                 # save checkpoint
                 ckpt = {
                     'step': step + 1,

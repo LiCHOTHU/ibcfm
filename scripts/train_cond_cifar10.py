@@ -86,7 +86,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         '--warmup',
         type=int,
-        default=5000,
+        default=500,
         help='learning rate warmup steps'
     )
     p.add_argument(
@@ -296,7 +296,7 @@ def save_samples_grid(
         value_range=value_range,
     )
     img = ToPILImage()(grid)
-    out_path = save_dir / f"mnist_flow_epoch{epoch:03d}.png"
+    out_path = save_dir / f"cifar10_flow_epoch{epoch:03d}.png"
     img.save(out_path)
     print(f"→ saved generated grid to {out_path}")
 
