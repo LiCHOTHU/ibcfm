@@ -35,7 +35,8 @@ from torchcfm.conditional_flow_matching import (
     VariancePreservingConditionalFlowMatcher,
 )
 from utils.utils_cifar import ema, generate_samples_return, compute_entropy_loss
-from torchcfm.models.unet.unet import UNetModel
+from torchcfm.models.unet import UNetModel
+
 from utils.dataset import get_imagenet64_loaders
 
 import pdb
