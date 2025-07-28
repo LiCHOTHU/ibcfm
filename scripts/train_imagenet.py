@@ -35,7 +35,7 @@ from torchcfm.conditional_flow_matching import (
     VariancePreservingConditionalFlowMatcher,
 )
 from utils.utils_cifar import ema, generate_samples_return, compute_entropy_loss
-from torchcfm.models.unet.unet import UNetModelWrapper
+from torchcfm.models.unet.unet import UNetModel
 from utils.dataset import get_imagenet64_loaders
 
 import pdb
@@ -177,7 +177,7 @@ def main() -> Tuple[float,int,float]:
         data_root=cfg['data_root'], batch_size=cfg['batch_size'], num_workers=cfg['num_workers']
     )
 
-    net = UNetModelWrapper(
+    net = UNetModel(
         dim=(3,64,64), num_res_blocks=4,
         num_channels=cfg['num_channel'], channel_mult=[1,2,2,2],
         num_heads=4, num_head_channels=64,
