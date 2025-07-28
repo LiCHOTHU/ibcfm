@@ -179,7 +179,7 @@ def main() -> Tuple[float,int,float]:
 
     # Conditional UNet
     net = UNetModel(
-        dim=(3,64,64), num_channels=cfg['num_channel'], num_res_blocks=2,
+        dim=(3,64,64), num_channels=cfg['num_channel'], num_res_blocks=4,
         num_classes=10, class_cond=True,
         channel_mult=[1,2,2,2], num_heads=4, num_head_channels=64,
         attention_resolutions='16', dropout=0.1
